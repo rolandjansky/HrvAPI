@@ -1,49 +1,44 @@
 # app.py
 from flask import Flask, request, jsonify
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import heartpy as hp
 
 app = Flask(__name__)
 
 
-@app.route('/getmsg/', methods=['GET'])
-def respond():
-    # Retrieve the name from url parameter
-    name = request.args.get("name", None)
+@app.route('/post/', methods=['POST'])
+def post_something():
+    hrdata = request.get_data()
 
+    sample_rate = 60
     # For debugging
-    print(f"got name {name}")
+    print(f"got name {hrdata}")
 
     response = {}
 
-    # Check if user sent a name at all
-    if not name:
-        response["ERROR"] = "no name found, please send a name."
-    # Check if the user entered a number not a name
-    elif str(name).isdigit():
-        response["ERROR"] = "name can't be numeric."
-    # Now the user entered a valid name
+    if not hrdata:
+        response["ERROR"] = "no data found, please send data."
     else:
-        response["MESSAGE"] = f"Welcome {name} to our awesome platform!!"
+        df = pd.read_json(hrdata)
+        data = df["time"]
+        sample_rate = round(hp.get_samplerate_datetime(data, timeformat='%Y-%m-%dT%H:%M:%S.%f'))
+        data = df["value"]
+        data = np.nan_to_num(data)
+        filtered_ppg = hp.filter_signal(data[20:],
+                                        cutoff=[0.6, 2.5],
+                                        filtertype='bandpass',
+                                        sample_rate=2 * sample_rate,
+                                        order=3,
+                                        return_top=False)
+        wd, m = hp.process(filtered_ppg, sample_rate=sample_rate,
+                           high_precision=True, clean_rr=True)
+        response["BPM"] = m["bpm"]
+        response["HRV"] = m["rmssd"]
 
     # Return the response in json format
     return jsonify(response)
-
-
-@app.route('/post/', methods=['POST'])
-def post_something():
-    param = request.form.get('name')
-    print(param)
-    # You can add the test cases you made in the previous function, but in our case here you are just testing the
-    # POST functionality
-    if param:
-        return jsonify({
-            "Message": f"Welcome {name} to our awesome platform!!",
-            # Add this option to distinct the POST request
-            "METHOD": "POST"
-        })
-    else:
-        return jsonify({
-            "ERROR": "no name found, please send a name."
-        })
 
 
 # A welcome message to test our server
