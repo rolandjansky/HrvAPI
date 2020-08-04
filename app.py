@@ -20,9 +20,6 @@ def post_something():
 
     if not hrdata:
         response["ERROR"] = "no data found, please send data."
-    elif len(hrdata) == 0:
-        response["BPM"] = 0
-        response["HRV"] = 0
     else:
         df = pd.read_json(hrdata)
         if not df.empty:
