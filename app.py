@@ -38,8 +38,8 @@ def post_something():
             response["BPM"] = m["bpm"]
             response["HRV"] = m["rmssd"]
         else:
-            response["BPM"] = 0
-            response["HRV"] = 0
+            response["BPM"] = 0.0
+            response["HRV"] = 0.0
 
     # Return the response in json format
     return jsonify(response)
