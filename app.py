@@ -1,8 +1,8 @@
 # app.py
 from flask import Flask, request, jsonify
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
+import math
 import heartpy as hp
 
 app = Flask(__name__)
@@ -35,8 +35,14 @@ def post_something():
                                             return_top=False)
             wd, m = hp.process(filtered_ppg, sample_rate=sample_rate,
                                high_precision=True, clean_rr=True)
-            response["BPM"] = m["bpm"]
-            response["HRV"] = m["rmssd"]
+            if math.isnan(m["bpm"]):
+                response["BPM"] = 0.0
+            else:
+                response["BPM"] = m["bpm"]
+            if math.isnan(m["rmssd"]):
+                response["HRV"] = 0.0
+            else:
+                response["HRV"] = m["rmssd"]
         else:
             response["BPM"] = 0.0
             response["HRV"] = 0.0
