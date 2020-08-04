@@ -25,20 +25,24 @@ def post_something():
         response["HRV"] = 0
     else:
         df = pd.read_json(hrdata)
-        data = df["time"]
-        sample_rate = round(hp.get_samplerate_datetime(data, timeformat='%Y-%m-%dT%H:%M:%S.%f'))
-        data = df["value"]
-        data = np.nan_to_num(data)
-        filtered_ppg = hp.filter_signal(data[20:],
-                                        cutoff=[0.6, 2.5],
-                                        filtertype='bandpass',
-                                        sample_rate=2 * sample_rate,
-                                        order=3,
-                                        return_top=False)
-        wd, m = hp.process(filtered_ppg, sample_rate=sample_rate,
-                           high_precision=True, clean_rr=True)
-        response["BPM"] = m["bpm"]
-        response["HRV"] = m["rmssd"]
+        if not df.empty:
+            data = df["time"]
+            sample_rate = round(hp.get_samplerate_datetime(data, timeformat='%Y-%m-%dT%H:%M:%S.%f'))
+            data = df["value"]
+            data = np.nan_to_num(data)
+            filtered_ppg = hp.filter_signal(data[20:],
+                                            cutoff=[0.6, 2.5],
+                                            filtertype='bandpass',
+                                            sample_rate=2 * sample_rate,
+                                            order=3,
+                                            return_top=False)
+            wd, m = hp.process(filtered_ppg, sample_rate=sample_rate,
+                               high_precision=True, clean_rr=True)
+            response["BPM"] = m["bpm"]
+            response["HRV"] = m["rmssd"]
+        else:
+            response["BPM"] = 0
+            response["HRV"] = 0
 
     # Return the response in json format
     return jsonify(response)
