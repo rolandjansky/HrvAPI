@@ -7,7 +7,7 @@ import heartpy as hp
 
 app = Flask(__name__)
 
-@app.route('/gethrv/', methods=['GET'])
+@app.route('/hrv/', methods=['GET'])
 def respond():
     # Retrieve the name from url parameter
     name = request.args.get("name", None)
