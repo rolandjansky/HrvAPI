@@ -1,4 +1,6 @@
 # app.py
+from random import random
+
 from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
@@ -20,12 +22,19 @@ def respond():
     # Check if user sent a name at all
     if not name:
         response["ERROR"] = "no name found, please send a name."
+        return jsonify(response), 400
     # Check if the user entered a number not a name
     elif str(name).isdigit():
         response["ERROR"] = "name can't be numeric."
+        return jsonify(response), 400
     # Check if the user is bob
     elif str(name) != 'Bob':
         response["ERROR"] = "User can't be found."
+        return jsonify(response), 404
+    # Check if server is in the mood
+    elif random() < 0.1:
+        response["ERROR"] = "Server not in the mood to answer your request. Try again."
+        return jsonify(response), 503
     # Now the user entered a valid name
     else:
         response["MESSAGE"] = f"Welcome {name} to our awesome platform!! Here's your daily heart-rate data."
@@ -769,7 +778,7 @@ def respond():
         ]
 
     # Return the response in json format
-    return jsonify(response)
+    return jsonify(response), 200
 
 @app.route('/post/', methods=['POST'])
 def post_something():
