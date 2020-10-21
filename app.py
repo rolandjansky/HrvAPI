@@ -2,12 +2,13 @@
 from random import random
 
 from flask import Flask, request, jsonify
+from flask import send_from_directory
 import numpy as np
 import pandas as pd
 import math
 import heartpy as hp
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 
 @app.route('/hrv/', methods=['GET'])
 def respond():
@@ -826,7 +827,7 @@ def post_something():
 # A welcome message to test our server
 @app.route('/')
 def index():
-    return "<h1>Welcome to our server !!</h1>"
+    return app.send_static_file('DataScientist_EngineerCaseStudy.pdf')
 
 
 if __name__ == '__main__':
